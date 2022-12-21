@@ -1,7 +1,7 @@
 name: GitHub FORCE test
 run-name: ${{ github.actor }} is testing out FORCE
 on:
-  push
+  push:
   schedule:
     - cron: '0 18 * * *'
 jobs:
