@@ -27,4 +27,4 @@ jobs:
         with:
           name: model_out
           path: |
-            use_case/model_run_out.txt
+            model_run_out.txt
