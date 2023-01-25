@@ -29,3 +29,4 @@ jobs:
           name: model_out
           path: |
             model_run_out.txt
+            use_cases/model_run_out.txt
