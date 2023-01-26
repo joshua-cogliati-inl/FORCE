@@ -27,6 +27,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: model_out
+          when: always
           path: |
             model_run_out.txt
             use_cases/model_run_out.txt
