@@ -28,6 +28,7 @@ OutputBaseFilename=force_setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+WizardImageFile=FORCE_logo.bmp
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
