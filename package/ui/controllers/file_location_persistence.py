@@ -1,5 +1,4 @@
 import os
-from collections.abc import MutableMapping
 
 
 class RCFile(dict):
@@ -12,14 +11,12 @@ class RCFile(dict):
         """
         super().__init__()
         self.path = path
-        with open(self.path, 'r') as f:
-            for line in f.readlines():
-                key, value = line.strip().split('=')
-                self |= {key: value}
+        if os.path.exists(self.path):
+            self.read()
 
-    def __del__(self):
+    def close(self):
         """
-        Destructor
+        Save and close the dotfile
         @In, None
         @Out, None
         """
@@ -27,7 +24,17 @@ class RCFile(dict):
         with open(self.path, 'w') as f:
             for key, value in self.items():
                 f.write(f"{key}={value}\n")
-        super().__del__()
+
+    def read(self):
+        """
+        Reads the dotfile
+        @In, None
+        @Out, None
+        """
+        with open(self.path, 'r') as f:
+            for line in f.readlines():
+                key, value = line.strip().split('=')
+                self |= {key: value}
 
 
 class FileLocationPersistence:
@@ -55,4 +62,12 @@ class FileLocationPersistence:
         @In, value, str, the last file location (file path or directory)
         @Out, None
         """
-        self.rcfile['DEFAULT_DIR'] = os.path.dirname(value)
+        self.rcfile['DEFAULT_DIR'] = os.path.abspath(os.path.dirname(value))
+
+    def close(self):
+        """
+        Closes the file location persistence
+        @In, None
+        @Out, None
+        """
+        self.rcfile.close()

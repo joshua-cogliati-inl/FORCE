@@ -16,7 +16,7 @@ class FileDialogController:
         """
         self.view = view
 
-        self._filename = None
+        self.filename = None
         self.file_type = file_type
         self.persistence = persistence
 
@@ -27,19 +27,17 @@ class FileDialogController:
         else:
             self.view.browse_button.config(command=self.open_selection_dialog)
 
-    @property
-    def filename(self):
+    def get_filename(self):
         """
         filename getter
         @In, None
         @Out, filename, str, the filename
         """
-        if not self._filename:  # None or empty string
+        if not self.filename:  # None or empty string
             return None
-        return self._filename
+        return self.filename
 
-    @filename.setter
-    def filename(self, value):
+    def set_filename(self, value):
         """
         filename setter
         @In, value, str, the filename
@@ -47,9 +45,10 @@ class FileDialogController:
         """
         if not os.path.exists(value):
             raise FileNotFoundError(f'File {value} does not exist')
-        self._filename = os.path.abspath(value)
+        self.filename = os.path.abspath(value)
         self.view.filename.set(os.path.basename(value))
-        self.persistence.set_location(value)
+        if self.persistence:
+            self.persistence.set_location(value)
 
     def open_selection_dialog(self):
         """
@@ -57,11 +56,11 @@ class FileDialogController:
         @In, None
         @Out, None
         """
-        initial_dir = self.persistence.get_location() if self.persistence else None
+        initial_dir = self.persistence.get_location() if self.persistence else os.getcwd()
         filetypes = [(self.file_type.upper(), f'*.{self.file_type.strip().lower()}') if self.file_type else ('All Files', '*.*')]
         filename = filedialog.askopenfilename(initialdir=initial_dir, filetypes=filetypes)
         if filename:
-            self.filename = filename
+            self.set_filename(filename)
 
     def open_save_dialog(self):
         """
@@ -69,7 +68,7 @@ class FileDialogController:
         @In, None
         @Out, None
         """
-        initial_dir = self.persistence.get_location() if self.persistence else None
+        initial_dir = self.persistence.get_location() if self.persistence else os.getcwd()
         filename = filedialog.asksaveasfilename(initialdir=initial_dir, defaultextension=f'.{self.file_type}')
         if filename:
-            self.filename = filename
+            self.set_filename(filename)

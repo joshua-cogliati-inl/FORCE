@@ -66,7 +66,7 @@ class FileSelectionController:
         self.file_dialog_controllers = {}
 
         # Remember the file locations for the user
-        self.file_location_persistence = FileLocationPersistence()
+        self.persistence = FileLocationPersistence()
 
         # Create the file selectors, adding any files specified from the command line
         model_package_name = model.get_package_name().strip().lower()
@@ -80,11 +80,11 @@ class FileSelectionController:
                 view=self.file_selection.file_selectors[spec.description],
                 file_type=spec.file_type,
                 is_output=spec.is_output,
-                persistence=self.file_location_persistence
+                persistence=self.persistence
             )
             if filename := args.get(spec.arg_name, None):
                 file_dialog_controller.set_filename(filename)
-                self.file_location_persistence.set_file_location(filename)
+                self.persistence.set_location(filename)
             self.file_dialog_controllers[spec.description] = file_dialog_controller
 
     def get_sys_args_from_file_selection(self):
@@ -97,7 +97,7 @@ class FileSelectionController:
         args = []
         for spec in self._file_specs:
             # Get the filename from the file selector
-            filename = self.file_dialog_controllers[spec.description].filename
+            filename = self.file_dialog_controllers[spec.description].get_filename()
             # Add the filename with its corresponding argument flag to the list
             if not os.path.exists(filename) and spec.arg_name != '-o':
                 raise FileNotFoundError(f"File {filename} not found")
@@ -108,6 +108,14 @@ class FileSelectionController:
         # Add any unknown arguments to pass along to the model
         args.extend(self.unknown_args)
         return args
+
+    def close_persistence(self):
+        """
+        Closes the file location persistence
+        @In, None
+        @Out, None
+        """
+        self.persistence.close()
 
     def _parse_cli_args(self):
         """
@@ -141,15 +149,3 @@ class FileSelectionController:
             if f'-{key}' in [spec.arg_name for spec in self._file_specs]:
                 args[f'-{key}'] = args.pop(key)
         return args, unknown
-
-    def _validate_positional_argument(self, spec, arg):
-        """
-        Validate a positional argument
-        @In, spec, FileSpec, the file specification
-        @In, arg, str, the argument
-        @Out, is_valid, bool, True if the argument matches the spec
-        """
-        is_valid = True
-        if spec.file_type:
-            is_valid &= arg.endswith(f'.{spec.file_type}')
-        # if
